@@ -14,7 +14,7 @@ import time
 import os
 import glob
 import datetime
-from socketIO_client_nexus import SocketIO, LoggingNamespace
+
 from picamera import PiCamera
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
@@ -22,11 +22,6 @@ from statistics import mode, StatisticsError
 from requests.exceptions import ConnectionError
 from zipfile import ZipFile
 
-
-# Setup where the sockets go
-hostn = '192.168.0.1'
-hostp = '3000'
-cardid = ""
 # Setup the TF model locations and scoring for results
 weights = '/code/vision/tensorflow-yolov4-tflite/checkpoints/yolov4-tiny-512v2.tflite'
 score = 0.4
@@ -39,19 +34,7 @@ tiny = True
 size = '512x512'
 saveresults = True
 
-
-# Response from SocketIO server
-def on_connect():
-    print('connect')
-
-def on_disconnect():
-    print('disconnect')
-
-def on_reconnect():
-    print('reconnect')
-	
-def drgStartrec(*args):
-    print('drg Start Rec')
+def Startrec(*args):
     #take_photos(camera)
 	# Take photos
 	# Save them in the correct folder
@@ -60,10 +43,6 @@ def drgStartrec(*args):
     start_time = time.monotonic()
     labellist = LoadLabels(labels)
   
-    # print('Input Details')
-    # print(input_details)
-    # print('Output Details')
-    # print(output_details)
 	# Now process all images in the directory and return result for each
     for filename in glob.glob(imagedir + '/*.jpg'):
         start_timesing = time.monotonic()
@@ -73,20 +52,12 @@ def drgStartrec(*args):
         print('---------  Elapsed Time ' + str(elapsed_mssing) + " secs")
     #zippedfile = ZipFiles(result)
     #DelFiles()
-    #distance2 = 0
-    #resultstr = result + '#' + zippedfile + '#' + str(distance2)
-    #try:
-      #socketIO = SocketIO('192.168.0.1', 3000, LoggingNamespace)
-      #socketIO.emit('result', resultstr) 
-      #socketIO.wait(seconds=1)
-    #except ConnectionError:
-    #     print('The server is down. Try again later.')
-    #except:
-    #     print('Error With connection to server sending result')
     elapsed_ms = round((time.monotonic() - start_time) ,3)
     print('Elapsed Time ' + str(elapsed_ms) + " secs")
 	
 def take_photos(camera):
+    # Take photos and save with format img + datetime take + .jpg
+    # Camera resolution set at end of file when script starts
     for i in range(2):
         camera.capture('/code/testimgs/image{0:04d}.jpg'.format(i))
     print('Taken Photos')
@@ -211,20 +182,6 @@ def ProcessImages(filename,interpreter,input_width,input_height,input_details,ou
        cv2.imwrite(imagedir + '/savedresults/' + finalboxtype + '_' +  tail, imageres)
     
     return finalboxtype
-
-#try:
-#Start the socket client to listen
-   #socketIO = SocketIO('192.168.0.1', 3000, LoggingNamespace)
-   #socketIO.on('connect', on_connect)
-   #socketIO.on('disconnect', on_disconnect)
-   #socketIO.on('reconnect', on_reconnect)
-   # Socket Listen for control box sending command that start button used
-   #socketIO.on('start', drgStartrec)
-   #socketIO.wait(seconds=1)
-#except ConnectionError:
-#   print('The server is down. Try again later.')
-#except:
-#   print('Error With connection to server startup')
    
 # Start the camera
 #camera = PiCamera()
@@ -241,7 +198,7 @@ output_details = interpreter.get_output_details()
 interpreter.allocate_tensors()
 
 def main(_argv):
-    drgStartrec()
+    Startrec()
    
 
 if __name__ == '__main__':
